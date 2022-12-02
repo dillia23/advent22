@@ -1,26 +1,27 @@
 package org.advent;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import org.advent.utils.FileFinder;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
 public class CalorieCounter {
-    private static final String CALORIES_FILE_LOC = "/resources/calories.txt";
+    private static final String CALORIES_FILE_LOC = "/calories.txt";
     private int maxCalories;
 
     private final PriorityQueue<Integer> topCalories;
 
     public CalorieCounter() {
-        final File input = new File(CALORIES_FILE_LOC);
         topCalories = new PriorityQueue<>(4);
-        try {
-            final Scanner scanner = new Scanner(input);
-            findMaxCalories(scanner);
-
-        } catch (FileNotFoundException e) {
+        final Scanner scanner;
+        try  {
+            scanner = FileFinder.getScannerForFileName(CALORIES_FILE_LOC);
+        } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
+        findMaxCalories(scanner);
     }
 
     public int getMaxCalories() {
