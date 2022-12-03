@@ -39,44 +39,45 @@ public class RockPaperScissors {
                 throw new IllegalStateException("input invalid");
             }
             final RpsOpponent opponent = RpsOpponent.fromString(s[0]);
-            final RpsPlayer player = RpsPlayer.fromString(s[1]);
+            final RpsPlayerGuide player = RpsPlayerGuide.fromString(s[1]);
             scoreRound(opponent, player);
         }
     }
 
-    private void scoreRound(final RpsOpponent opponent, final RpsPlayer player) {
+    private void scoreRound(final RpsOpponent opponent, final RpsPlayerGuide player) {
         switch (player) {
-            case ROCK -> {
-                totalScore += ROCK;
+            case LOSE -> {
+                // unnecessary but nice for accounting
+                totalScore += LOST;
                 if (opponent == RpsOpponent.SCISSORS) {
-                    totalScore += WON;
+                    totalScore += PAPER;
                 } else if (opponent == RpsOpponent.ROCK) {
-                    totalScore += DRAW;
+                    totalScore += SCISSORS;
                 } else {
-                    totalScore += LOST;
+                    totalScore += ROCK;
                 }
             }
-            case PAPER -> {
-                totalScore += PAPER;
+            case DRAW -> {
+                totalScore += DRAW;
                 if (opponent == RpsOpponent.ROCK) {
-                    totalScore += WON;
+                    totalScore += ROCK;
                 } else if (opponent == RpsOpponent.PAPER) {
-                    totalScore += DRAW;
+                    totalScore += PAPER;
                 } else {
-                    totalScore += LOST;
+                    totalScore += SCISSORS;
                 }
             }
-            case SCISSORS -> {
-                totalScore += SCISSORS;
+            case WIN -> {
+                totalScore += WON;
                 if (opponent == RpsOpponent.PAPER) {
-                    totalScore += WON;
+                    totalScore += SCISSORS;
                 } else if (opponent == RpsOpponent.SCISSORS) {
-                    totalScore += DRAW;
+                    totalScore += ROCK;
                 } else {
-                    totalScore += LOST;
+                    totalScore += PAPER;
                 }
             }
-            default -> throw new IllegalStateException("must be rock, paper, or scissors");
+            default -> throw new IllegalStateException("must be lost, draw, or won");
         }
     }
 }
