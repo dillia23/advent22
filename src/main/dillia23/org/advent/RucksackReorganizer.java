@@ -4,7 +4,7 @@ import org.advent.utils.FileFinder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Scanner;
 
 public class RucksackReorganizer {
     private static final String RUCKSACK_FILE_LOC = "/rucksack.txt";
@@ -28,13 +28,14 @@ public class RucksackReorganizer {
     private void calculateRucksacksPriority(final Scanner scanner) {
         while(scanner.hasNextLine()) {
             final String line = scanner.nextLine();
-            final Set<Character> buffer = new HashSet<>();
+            final boolean[] buffer = new boolean[256];
             for (int i = 0; i < line.length() / 2; i++) {
-                buffer.add(line.charAt(i));
+                buffer[line.charAt(i)] = true;
             }
             for (int i = line.length() / 2; i < line.length(); i++) {
-                if (buffer.contains(line.charAt(i))) {
-                    totalPriority += getPriority(line.charAt(i));
+                if (buffer[line.charAt(i)]) {
+                    totalPriority += (getPriority(line.charAt(i)));
+                    break;
                 }
             }
         }
@@ -48,11 +49,4 @@ public class RucksackReorganizer {
         }
     }
 
-    private static char switchCase(final char c) {
-        if (c > 'Z') {
-            return Character.toUpperCase(c);
-        } else {
-            return Character.toLowerCase(c);
-        }
-    }
 }
