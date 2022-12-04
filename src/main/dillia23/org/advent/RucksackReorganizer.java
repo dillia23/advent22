@@ -18,13 +18,14 @@ public class RucksackReorganizer {
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        calculateRucksacksPriority(scanner);
+        calculateRucksacksPriorityBy3(scanner);
     }
 
     public int getTotalPriority() {
         return totalPriority;
     }
 
+    // part 1
     private void calculateRucksacksPriority(final Scanner scanner) {
         while(scanner.hasNextLine()) {
             final String line = scanner.nextLine();
@@ -41,6 +42,32 @@ public class RucksackReorganizer {
         }
     }
 
+    // part 2
+    private void calculateRucksacksPriorityBy3(final Scanner scanner) {
+        while(scanner.hasNextLine()) {
+            // process group of 3
+            int group = 1;
+            final int[] buffer = new int[256];
+            while (group <= 3) {
+                processGroup(scanner, buffer, group);
+                group++;
+            }
+        }
+    }
+
+    private void processGroup(final Scanner scanner, final int[] buffer, int group) {
+        final String line = scanner.nextLine();
+        for (int i = 0; i < line.length(); i++) {
+            if (buffer[line.charAt(i)] == group - 1) {
+                buffer[line.charAt(i)] = group;
+            }
+            if(buffer[line.charAt(i)] == 3) {
+                totalPriority += getPriority(line.charAt(i));
+                break;
+            }
+        }
+    }
+
     private static int getPriority(final char c) {
         if (c > 'Z') {
             return c - 'a' + 1;
@@ -48,5 +75,4 @@ public class RucksackReorganizer {
             return c - 'A' + 27;
         }
     }
-
 }
