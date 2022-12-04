@@ -9,6 +9,16 @@ public class Main {
 
         // Day 2
         day2();
+
+        // Day 3
+        day3();
+    }
+
+    private static void day3() {
+        System.out.println("Day 3: ");
+        final RucksackReorganizer rucksackReorganizer = new RucksackReorganizer();
+        System.out.printf("Total priority: %s%n", rucksackReorganizer.getTotalPriority());
+        System.out.printf("***%n");
     }
 
     private static void day2() {
