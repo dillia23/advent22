@@ -20,7 +20,7 @@ public class Main {
     private static void day4() {
         System.out.println("Day 4: ");
         final CompartmentClearer compartmentClearer = new CompartmentClearer();
-        System.out.printf("Total contained pairs: %s%n", compartmentClearer.getContainedPairs());
+        System.out.printf("Total overlapping pairs: %s%n", compartmentClearer.getOverlappingPairs());
         System.out.printf("***%n");
     }
 

@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class CompartmentClearer {
     private static final String COMPARTMENTS_FILE_LOC = "/compartments.txt";
 
-    private int containedPairs;
+    private int overlappingPairs;
 
     public CompartmentClearer() {
         final Scanner scanner;
@@ -21,10 +21,11 @@ public class CompartmentClearer {
         findOverlappingCleaners(scanner);
     }
 
-    public int getContainedPairs() {
-        return containedPairs;
+    public int getOverlappingPairs() {
+        return overlappingPairs;
     }
 
+    // part 2
     private void findOverlappingCleaners(final Scanner scanner) {
         while(scanner.hasNextLine()) {
             final String line = scanner.nextLine();
@@ -37,9 +38,13 @@ public class CompartmentClearer {
             final Assignment assignment2 = getAssignment(pairs[1]);
 
             if (assignment1.start <= assignment2.start && assignment1.end >= assignment2.end) {
-                containedPairs++;
+                overlappingPairs++;
             } else if (assignment2.start <= assignment1.start && assignment2.end >= assignment1.end) {
-                containedPairs++;
+                overlappingPairs++;
+            } else if (assignment1.start <= assignment2.start && assignment1.end >= assignment2.start) {
+                overlappingPairs++;
+            } else if (assignment2.start <= assignment1.start && assignment2.end >= assignment1.start) {
+                overlappingPairs++;
             }
         }
     }
@@ -53,6 +58,5 @@ public class CompartmentClearer {
         return new Assignment(Integer.parseInt(assignmentString[0]), Integer.parseInt(assignmentString[1]));
     }
 
-    private record Assignment(int start, int end) {
-    }
+    private record Assignment(int start, int end) {}
 }
