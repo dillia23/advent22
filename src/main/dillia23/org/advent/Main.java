@@ -12,6 +12,16 @@ public class Main {
 
         // Day 3
         day3();
+
+        // Day 4
+        day4();
+    }
+
+    private static void day4() {
+        System.out.println("Day 4: ");
+        final CompartmentClearer compartmentClearer = new CompartmentClearer();
+        System.out.printf("Total contained pairs: %s%n", compartmentClearer.getContainedPairs());
+        System.out.printf("***%n");
     }
 
     private static void day3() {
