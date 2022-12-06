@@ -15,6 +15,18 @@ public class Main {
 
         // Day 4
         day4();
+
+        // Day 5
+        day5();
+    }
+
+
+
+    private static void day5() {
+        System.out.println("Day 5: ");
+        final CrateStacker crateStacker = new CrateStacker();
+        System.out.printf("Final crate tops: %s%n", crateStacker.getCrateTops());
+        System.out.printf("***%n");
     }
 
     private static void day4() {
