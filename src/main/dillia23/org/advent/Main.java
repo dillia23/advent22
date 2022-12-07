@@ -18,9 +18,17 @@ public class Main {
 
         // Day 5
         day5();
+
+        // Day 6
+        day6();
     }
 
-
+    private static void day6() {
+        System.out.println("Day 6: ");
+        final DatastreamReader datastreamReader = new DatastreamReader();
+        System.out.printf("Need to process {%s} to get start-of-packet marker.%n", datastreamReader.getStartOfPacketMarkerLoc());
+        System.out.printf("***%n");
+    }
 
     private static void day5() {
         System.out.println("Day 5: ");
