@@ -27,6 +27,7 @@ public class Main {
         System.out.println("Day 6: ");
         final DatastreamReader datastreamReader = new DatastreamReader();
         System.out.printf("Need to process {%s} to get start-of-packet marker.%n", datastreamReader.getStartOfPacketMarkerLoc());
+        System.out.printf("Need to process {%s} to get start-of-message marker.%n", datastreamReader.getStartOfMessageMarkerLoc());
         System.out.printf("***%n");
     }
 
