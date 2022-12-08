@@ -21,6 +21,17 @@ public class Main {
 
         // Day 6
         day6();
+
+        // Day 7
+        day7();
+    }
+
+    private static void day7() {
+        System.out.println("Day 7: ");
+        final DirectoryScanner directoryScanner = new DirectoryScanner();
+        System.out.printf("Total directory size: %s%n", directoryScanner.getTotalSize());
+        System.out.printf("Small directory size to delete for update: %s%n", directoryScanner.getMinDirSize());
+        System.out.printf("***%n");
     }
 
     private static void day6() {
