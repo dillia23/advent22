@@ -10,11 +10,16 @@ import java.util.Scanner;
 
 public class DirectoryScanner {
     private static final String TERMINAL_FILE_LOC = "/terminal.txt";
-    private static final int MAX_SIZE = 100_000;
+
+    private static final long REQ_SPACE = 30_000_000;
+
+    private static final long AVAIL_SPACE = 70_000_000;
 
     private Directory root;
 
-    private int totalSize;
+    private final long totalSize;
+    private final long availSpace;
+    private long minDirSize;
 
     public DirectoryScanner() {
         final Scanner scanner;
@@ -24,7 +29,11 @@ public class DirectoryScanner {
             throw new RuntimeException(e);
         }
         scanTerminalCommands(scanner);
-        calcDirectories();
+        totalSize = calcDirectories(root);
+        availSpace = AVAIL_SPACE - totalSize;
+        System.out.println(availSpace);
+        minDirSize = Integer.MAX_VALUE;
+        calcMinDirSize(root);
     }
 
     private void scanTerminalCommands(final Scanner scanner) {
@@ -53,10 +62,6 @@ public class DirectoryScanner {
         }
     }
 
-    private void calcDirectories() {
-        calcDirectories(root);
-    }
-
     private int calcDirectories(final Directory dir) {
         if (dir == null) {
             return 0;
@@ -70,9 +75,32 @@ public class DirectoryScanner {
                 total += file.size;
             }
 
-            if (total <= MAX_SIZE) {
-                totalSize += total;
+            return total;
+        }
+    }
+
+    public long getMinDirSize() {
+        return minDirSize;
+    }
+
+    private long calcMinDirSize(final Directory dir) {
+        if (dir == null) {
+            return 0;
+        } else {
+            long total = 0;
+            for (final Directory child: dir.children) {
+                total += calcMinDirSize(child);
             }
+
+            for (final File file: dir.files) {
+                total += file.size;
+            }
+
+            // 7000000 = totalSize + REQ + Dir_DEL
+            if (total + availSpace >= REQ_SPACE) {
+                minDirSize = Math.min(minDirSize, total);
+            }
+
             return total;
         }
     }
@@ -140,7 +168,7 @@ public class DirectoryScanner {
         return new File(parsed[1], Integer.parseInt(parsed[0]));
     }
 
-    public int getTotalSize() {
+    public long getTotalSize() {
         return totalSize;
     }
 
