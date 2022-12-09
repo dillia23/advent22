@@ -120,11 +120,10 @@ public class TreeScanner {
         return trees;
     }
 
-    // brute force
     private void calcScenicScore() {
         for (int row = 0; row < treeGrove.length; row++) {
             for (int col = 0; col < treeGrove[row].length; col++) {
-                calcScenicScoreVerbose(row, col);
+                calcScenicScore(row, col);
             }
         }
     }
@@ -133,34 +132,19 @@ public class TreeScanner {
         final Tree tree = treeGrove[row][col];
         final List<Integer> scores = new ArrayList<>();
         for (int[] direction: MatrixUtils.getDirections()) {
-            int score = 0;
             boolean clear = true;
-            // keep moving
-            while (clear) {
-                // check if initial tree is an edge
-                if (score == 0 &&
-                        MatrixUtils.isMoveOutOfBounds(treeGrove, new int[]{row, col}, direction)) {
-                    clear = false;
-                    scores.add(score);
-                }
-                // we're done if we hit an edge
-                else if (MatrixUtils.isMoveOutOfBounds(treeGrove, new int[]{row, col}, direction)) {
-                    score++;
-                    scores.add(score);
-                    clear = false;
-                }
-                // we're done if we can't see beyond the next tree
-                else if (tree.height <= treeGrove[row + direction[0]][col + direction[1]].height) {
-                    score++;
-                    clear = false;
-                    scores.add(score);
-                } else {
-                    score++;
+            int score = 0;
+
+            while (clear && !MatrixUtils.isMoveOutOfBounds(treeGrove, new int[]{row, col}, direction)) {
+                score++;
+                if (treeGrove[row + direction[0]][col + direction[1]].height < tree.height) {
                     MatrixUtils.moveSameDirection(direction);
+                } else {
+                    clear = false;
                 }
             }
+            scores.add(score);
         }
-        // store the highest scenic score or 0 for an edge
         treeGrove[row][col] = new Tree(
                 tree.height,
                 tree.visible,
