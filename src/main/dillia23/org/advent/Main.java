@@ -24,6 +24,17 @@ public class Main {
 
         // Day 7
         day7();
+
+        // Day 8
+        day8();
+    }
+
+    private static void day8() {
+        System.out.println("Day 8:");
+        final TreeScanner treeScanner = new TreeScanner();
+        System.out.printf("Total visible trees: %s%n", treeScanner.getVisibleTrees());
+        System.out.printf("Highest scenic score: %s%n", treeScanner.getHighestScenicScore());
+        System.out.printf("***%n");
     }
 
     private static void day7() {
