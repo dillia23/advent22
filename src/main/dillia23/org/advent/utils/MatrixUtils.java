@@ -9,4 +9,20 @@ public class MatrixUtils {
 
         return nextRow < 0 || nextCol < 0 || nextRow >= matrix.length || nextCol >= matrix[0].length;
     }
+
+    public static int[][] getDirections() {
+        return new int[][] {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
+    }
+
+    public static void moveSameDirection(int[] direction) {
+        if(direction[0] > 0) {
+            direction[0]++;
+        } else if(direction[0] < 0) {
+            direction[0]--;
+        } else if(direction[1] > 0) {
+            direction[1]++;
+        } else {
+            direction[1]--;
+        }
+    }
 }

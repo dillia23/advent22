@@ -5,13 +5,16 @@ import org.advent.utils.MatrixUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class TreeScanner {
     private static final String TREES_FILE_LOC = "/trees.txt";
 
-    private int visibleTrees;
+    private final int visibleTrees;
     private final Tree[][] treeGrove;
+    private final int highestScenicScore;
 
     public TreeScanner() {
         final Scanner scanner;
@@ -23,7 +26,9 @@ public class TreeScanner {
         }
         treeGrove = buildTreeGrove(scanner);
         scanTrees();
-        countVisibleTreez();
+        visibleTrees = countVisibleTrees();
+        calcScenicScore();
+        highestScenicScore = setHighestScenicScore();
     }
 
     public int getVisibleTrees() {
@@ -31,6 +36,10 @@ public class TreeScanner {
     }
 
     public int getHighestScenicScore() {
+        return highestScenicScore;
+    }
+
+    private int setHighestScenicScore() {
         int maxScenicScore = -1;
         for (final Tree[] trees: treeGrove) {
             for (final Tree tree: trees) {
@@ -47,7 +56,7 @@ public class TreeScanner {
             int rHeight = -1;
             for (int col = 0; col < treeGrove[row].length; col++) {
                 if (treeGrove[row][col].height > rHeight) {
-                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, -1);
+                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, 1);
                     rHeight = treeGrove[row][col].height;
                 }
             }
@@ -56,7 +65,7 @@ public class TreeScanner {
             int lHeight = -1;
             for (int col = treeGrove[row].length - 1; col >= 0; col--) {
                 if (treeGrove[row][col].height > lHeight) {
-                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, -1);
+                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, 1);
                     lHeight = treeGrove[row][col].height;
                 }
             }
@@ -67,7 +76,7 @@ public class TreeScanner {
             int tHeight = -1;
             for (int row = 0; row < treeGrove.length; row++) {
                 if (treeGrove[row][col].height > tHeight) {
-                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, -1);
+                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, 1);
                     tHeight = treeGrove[row][col].height;
                 }
             }
@@ -76,22 +85,24 @@ public class TreeScanner {
             int bHeight = -1;
             for (int row = treeGrove.length - 1; row >= 0; row--) {
                 if (treeGrove[row][col].height > bHeight) {
-                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, -1);
+                    treeGrove[row][col] = new Tree(treeGrove[row][col].height, true, 1);
                     bHeight = treeGrove[row][col].height;
                 }
             }
         }
     }
 
-    private void countVisibleTreez() {
-        for (int row = 0; row < treeGrove.length; row++) {
-            for (int col = 0; col < treeGrove[row].length; col++) {
-                final Tree tree = treeGrove[row][col];
+    private int countVisibleTrees() {
+        int visible = 0;
+        for (final Tree[] trees: treeGrove) {
+            for (final Tree tree: trees) {
                 if (tree.visible) {
-                    visibleTrees++;
+                    visible++;
                 }
             }
         }
+
+        return visible;
     }
 
     private Tree[][] buildTreeGrove(final Scanner scanner) {
@@ -101,7 +112,7 @@ public class TreeScanner {
             final String line = scanner.nextLine();
             for (int col = 0; col < line.length(); col++) {
                 int height = Integer.parseInt(String.valueOf(line.charAt(col)));
-                trees[row][col] = new Tree(height, false, -1);
+                trees[row][col] = new Tree(height, false, 1);
             }
             row++;
         }
@@ -109,116 +120,114 @@ public class TreeScanner {
         return trees;
     }
 
-    private void countVisibleTrees() {
-        int dir = 0;
-        int records = treeGrove.length * treeGrove[0].length;
-        int left = 0;
-        int right = treeGrove.length - 1;
-        int top = 0;
-        int bottom = treeGrove[0].length - 1;
-        while (records > 0) {
-            // go right
-            if (dir % 4 == 0) {
-                for (int col = left; col <= right; col++) {
-                    records--;
-                    visibleTrees += countVisibleTrees(top, col);
-                }
-                top++;
+    // brute force
+    private void calcScenicScore() {
+        for (int row = 0; row < treeGrove.length; row++) {
+            for (int col = 0; col < treeGrove[row].length; col++) {
+                calcScenicScoreVerbose(row, col);
             }
-            // go down
-            else if (dir % 4 == 1) {
-                for (int row = top; row <= bottom; row++) {
-                    records--;
-                    visibleTrees += countVisibleTrees(row, right);
-                }
-                right--;
-            }
-            // go left
-            else if (dir % 4 == 2) {
-                for (int col = right; col >= left; col--) {
-                    records--;
-                    visibleTrees += countVisibleTrees(bottom, col);
-                }
-                left++;
-            }
-            // go up
-            else {
-                for (int row = bottom; row >= top; row--) {
-                    records--;
-                    visibleTrees += countVisibleTrees(row, left);
-                }
-                bottom--;
-            }
-
-            dir++;
         }
     }
 
-    private void countVisibleTreesReverse() {
-        int dir = 0;
-        int records = treeGrove.length * treeGrove[0].length;
-        int left = 0;
-        int right = treeGrove.length - 1;
-        int top = 0;
-        int bottom = treeGrove[0].length - 1;
-        while (records > 0) {
-            // go down
-            if (dir % 4 == 0) {
-                for (int row = top; row <= bottom; row++) {
-                    records--;
-                    visibleTrees += countVisibleTrees(row, right);
-                }
-                right--;
-            }
-            // go right
-            if (dir % 4 == 1) {
-                for (int col = left; col <= right; col++) {
-                    records--;
-                    visibleTrees += countVisibleTrees(top, col);
-                }
-                top++;
-            }
-            // go up
-            if(dir % 4 == 2) {
-                for (int row = bottom; row >= top; row--) {
-                    records--;
-                    visibleTrees += countVisibleTrees(row, left);
-                }
-                bottom--;
-            }
-            // go left
-            if (dir % 4 == 3) {
-                for (int col = right; col >= left; col--) {
-                    records--;
-                    visibleTrees += countVisibleTrees(bottom, col);
-                }
-                left++;
-            }
-
-            dir++;
-        }
-    }
-
-    private int countVisibleTrees(final int row, final int col) {
+    private void calcScenicScore(final int row, final int col) {
         final Tree tree = treeGrove[row][col];
-        // only check outside directions
-        for (final int[] direction: MatrixUtils.DIRECTIONS) {
-            // check if out of bounds
-            if (MatrixUtils.isMoveOutOfBounds(treeGrove, new int[] {row, col}, direction)) {
-                treeGrove[row][col] = new Tree(tree.height, true, -1);
-                return 1;
+        final List<Integer> scores = new ArrayList<>();
+        for (int[] direction: MatrixUtils.getDirections()) {
+            int score = 0;
+            boolean clear = true;
+            // keep moving
+            while (clear) {
+                // check if initial tree is an edge
+                if (score == 0 &&
+                        MatrixUtils.isMoveOutOfBounds(treeGrove, new int[]{row, col}, direction)) {
+                    clear = false;
+                    scores.add(score);
+                }
+                // we're done if we hit an edge
+                else if (MatrixUtils.isMoveOutOfBounds(treeGrove, new int[]{row, col}, direction)) {
+                    score++;
+                    scores.add(score);
+                    clear = false;
+                }
+                // we're done if we can't see beyond the next tree
+                else if (tree.height <= treeGrove[row + direction[0]][col + direction[1]].height) {
+                    score++;
+                    clear = false;
+                    scores.add(score);
+                } else {
+                    score++;
+                    MatrixUtils.moveSameDirection(direction);
+                }
             }
-            final Tree move = treeGrove[row + direction[0]][col + direction[1]];
-            // if tree is visible next direction and taller curr direction
-            if (move.visible && tree.height > move.height) {
-                treeGrove[row][col] = new Tree(tree.height, true, -1);
-                return 1;
+        }
+        // store the highest scenic score or 0 for an edge
+        treeGrove[row][col] = new Tree(
+                tree.height,
+                tree.visible,
+                Math.max(tree.scenicScore, scores.stream().reduce(1, (a, b) -> a * b)));
+    }
+
+    private void calcScenicScoreVerbose(final int row, final int col) {
+        final Tree tree = treeGrove[row][col];
+        // check right
+        boolean clearRight = true;
+        int rightScore = 0;
+        int colRight = col + 1;
+        while(clearRight && colRight < treeGrove[row].length) {
+            rightScore++;
+            if(treeGrove[row][colRight].height < tree.height) {
+                colRight++;
+            } else {
+                clearRight = false;
             }
-            // need an update case
-            // if a tree was already visited but now an edge is actually visible
         }
 
-        return 0;
+        // check left
+        boolean clearLeft = true;
+        int leftScore = 0;
+        int colLeft = col - 1;
+        while(clearLeft && colLeft >= 0) {
+            leftScore++;
+            if(treeGrove[row][colLeft].height < tree.height) {
+                colLeft--;
+            } else {
+                clearLeft = false;
+            }
+        }
+
+        // go down
+        boolean clearDown = true;
+        int downScore = 0;
+        int rowDown = row + 1;
+        while(clearDown && rowDown < treeGrove.length) {
+            downScore++;
+            if(treeGrove[rowDown][col].height < tree.height) {
+                rowDown++;
+            } else {
+                clearDown = false;
+            }
+        }
+
+        // go up
+        boolean clearUp = true;
+        int upScore = 0;
+        int rowUp = row - 1;
+        while(clearUp && rowUp >= 0) {
+            upScore++;
+            if(treeGrove[rowUp][col].height < tree.height) {
+                rowUp--;
+            } else {
+                clearUp = false;
+            }
+        }
+
+        final int product = rightScore * leftScore * downScore * upScore;
+
+        // store the highest scenic score or 0 for an edge
+        treeGrove[row][col] = new Tree(
+                tree.height,
+                tree.visible,
+                Math.max(tree.scenicScore, product));
     }
 
     private static record Tree(int height, boolean visible, int scenicScore) {}
