@@ -27,6 +27,16 @@ public class Main {
 
         // Day 8
         day8();
+
+        // Day 9
+        day9();
+    }
+
+    private static void day9() {
+        System.out.println("Day 9:");
+        final RopeSimulator ropeSimulator = new RopeSimulator();
+        System.out.printf("Rope tail visited to {%s} positions%n", ropeSimulator.getPositionCount());
+        System.out.printf("***%n");
     }
 
     private static void day8() {
