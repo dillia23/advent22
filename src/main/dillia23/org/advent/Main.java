@@ -4,32 +4,21 @@ import org.advent.day2.RockPaperScissors;
 
 public class Main {
     public static void main(String[] args) {
-        // Day 1
-        day1();
-
-        // Day 2
-        day2();
-
-        // Day 3
-        day3();
-
-        // Day 4
-        day4();
-
-        // Day 5
-        day5();
-
-        // Day 6
-        day6();
-
-        // Day 7
-        day7();
-
         // Day 8
         day8();
 
         // Day 9
         day9();
+
+        // Day 10
+        day10();
+    }
+
+    private static void day10() {
+        System.out.println("Day 10:");
+        final SignalStrengthChecker signalStrengthChecker = new SignalStrengthChecker();
+        System.out.printf("Signal strength sum: %s%n", signalStrengthChecker.getSignalStrength());
+        System.out.printf("***%n");
     }
 
     private static void day9() {
