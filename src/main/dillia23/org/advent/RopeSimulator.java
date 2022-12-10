@@ -4,10 +4,14 @@ import org.advent.utils.FileFinder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
 
 public class RopeSimulator {
     private static final String ROPE_FILE_LOC = "/ropes.txt";
+    private static final int KNOTS = 10;
 
     private final int positionCount;
 
@@ -26,86 +30,98 @@ public class RopeSimulator {
     }
 
     private int ropeJourney(final Scanner scanner) {
-        int count = 0;
+        // 2 knots should result in 6090 positions visited
         final Coordinate origin = new Coordinate(0, 0);
-        final Queue<Coordinate> heads = new LinkedList<>();
-        final Queue<Coordinate> tails = new LinkedList<>();
+        // keep an ordered array of knots with 0 as the head to 2 as the tail
+        // tracks the current position of the knot
+        final Coordinate[] knots = new Coordinate[KNOTS];
+        // tracks where the tail has visited
         final Set<Coordinate> visited = new HashSet<>();
 
-        heads.add(origin);
-        tails.add(origin);
+        // start at the origin
+        Arrays.fill(knots, origin);
 
         while (scanner.hasNextLine()) {
             final String line = scanner.nextLine();
             final Instruction instruction = getInstruction(line);
 
-            Coordinate newHead = heads.remove();
-            Coordinate newTail = tails.remove();
-
             switch (instruction.direction) {
                 case 'R' -> {
                     // go right
                     for (int i = 0; i < instruction.steps; i++) {
-                        final Coordinate nextHead = new Coordinate(newHead.x + 1, newHead.y);
-                        if (ropeLengthGreaterThan1(newTail, nextHead)) {
-                            newTail = newHead;
-                        }
-                        newHead = nextHead;
-                        count += isVisited(visited, newTail);
+                        final Coordinate head = knots[0];
+                        knots[0] = new Coordinate(head.x() + 1, head.y());
+                        knots[1] = ropeLengthGreaterThan1(knots[0], knots[1]) ? head : knots[1];
+                        shuffleKnots(knots, visited);
                     }
                 }
                 case 'L' -> {
                     // go left
                     for (int i = 0; i < instruction.steps; i++) {
-                        final Coordinate nextHead = new Coordinate(newHead.x - 1, newHead.y);
-                        if (ropeLengthGreaterThan1(newTail, nextHead)) {
-                            newTail = newHead;
-                        }
-                        newHead = nextHead;
-                        count += isVisited(visited, newTail);
+                        final Coordinate head = knots[0];
+                        knots[0] = new Coordinate(head.x() - 1, head.y());
+                        knots[1] = ropeLengthGreaterThan1(knots[0], knots[1]) ? head : knots[1];
+                        shuffleKnots(knots, visited);
                     }
                 }
                 case 'U' -> {
                     // go up
                     for (int i = 0; i < instruction.steps; i++) {
-                        final Coordinate nextHead = new Coordinate(newHead.x, newHead.y + 1);
-                        if (ropeLengthGreaterThan1(newTail, nextHead)) {
-                            newTail = newHead;
-                        }
-                        newHead = nextHead;
-                        count += isVisited(visited, newTail);
+                        final Coordinate head = knots[0];
+                        knots[0] = new Coordinate(head.x(), head.y() + 1);
+                        knots[1] = ropeLengthGreaterThan1(knots[0], knots[1]) ? head : knots[1];
+                        shuffleKnots(knots, visited);
                     }
                 }
                 case 'D' -> {
                     // go down
                     for (int i = 0; i < instruction.steps; i++) {
-                        final Coordinate nextHead = new Coordinate(newHead.x, newHead.y - 1);
-                        if (ropeLengthGreaterThan1(newTail, nextHead)) {
-                            newTail = newHead;
-                        }
-                        newHead = nextHead;
-                        count += isVisited(visited, newTail);
+                        final Coordinate head = knots[0];
+                        knots[0] = new Coordinate(head.x(), head.y() - 1);
+                        knots[1] = ropeLengthGreaterThan1(knots[0], knots[1]) ? head : knots[1];
+                        shuffleKnots(knots, visited);
                     }
                 }
                 default -> throw new IllegalArgumentException("invalid direction: " + instruction.direction);
             }
-            heads.add(newHead);
-            tails.add(newTail);
         }
 
-        return count;
+        return visited.size();
+    }
+
+    private static void shuffleKnots(
+            final Coordinate[] knots,
+            final Set<Coordinate> visited) {
+        for (int j = 2; j < knots.length; j++) {
+            if (ropeLengthGreaterThan1(knots[j - 1], knots[j])) {
+                knots[j] = moveKnot(knots[j - 1], knots[j]);
+            }
+        }
+        visited.add(knots[knots.length - 1]);
+    }
+
+    private static Coordinate moveKnot(final Coordinate knot1, final Coordinate knot2) {
+            int x = knot2.x();
+            int y =  knot2.y();
+            int dx = knot2.x - knot1.x;
+            int dy = knot2.y - knot1.y;
+
+            if (dx > 0) {
+                x--;
+            } else if (dx < 0) {
+                x++;
+            }
+            if (dy > 0) {
+                y--;
+            } else if (dy < 0) {
+                y++;
+            }
+
+            return new Coordinate(x, y);
     }
 
     private static boolean ropeLengthGreaterThan1(final Coordinate c1, final Coordinate c2) {
-        return Math.abs(c1.x - c2.x) > 1 || Math.abs(c1.y - c2.y) > 1;
-    }
-
-    private static int isVisited(final Set<Coordinate> visited, final Coordinate coordinate) {
-        if (!visited.contains(coordinate)) {
-            visited.add(coordinate);
-            return 1;
-        }
-        return 0;
+        return Math.abs(c1.x() - c2.x()) > 1 || Math.abs(c1.y() - c2.y()) > 1;
     }
 
     private static Instruction getInstruction(final String input) {
