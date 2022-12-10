@@ -30,31 +30,25 @@ public class SignalStrengthChecker {
         int cycle = 0;
         int register = 1;
         int signalStrength = 0;
-        final Queue<String> commands = new LinkedList<>();
         while(scanner.hasNextLine()) {
-            final String line = scanner.nextLine();
-            if (line.startsWith("addx")) {
-                // this is hack. i am tired
-                commands.add(String.format("%shack", line));
-            }
-            commands.add(line);
-        }
+            final String input = scanner.nextLine();
 
-        while(!commands.isEmpty()) {
-            final String input = commands.remove();
-            if (INTERVALS.contains(cycle + 1)) {
-                signalStrength = (cycle + 1) * register + signalStrength;
-            }
             if (input.equals("noop")) {
                 cycle++;
-            } else if(input.endsWith("hack")) {
-                cycle++;
             } else if (input.startsWith("addx")) {
+                cycle++;
+                // addx takes two cycles add we need to check the interval each cycle
+                if (INTERVALS.contains(cycle + 1)) {
+                    signalStrength = (cycle + 1) * register + signalStrength;
+                }
                 cycle++;
                 int v = getV(input);
                 register += v;
             } else {
                 throw new IllegalArgumentException("invalid command");
+            }
+            if (INTERVALS.contains(cycle + 1)) {
+                signalStrength = (cycle + 1) * register + signalStrength;
             }
         }
 
