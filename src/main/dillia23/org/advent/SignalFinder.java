@@ -13,6 +13,7 @@ import java.util.Set;
 
 public class SignalFinder {
     private static final String ELEVATION_FILE_LOC = "/elevation.txt";
+    private static final char BOTTOM_ELEVATION = 'a';
 
     private final int minSteps;
     private final char[][] elevation;
@@ -38,13 +39,13 @@ public class SignalFinder {
     private int findMinSteps() {
         final Set<Coordinate> visited = new HashSet<>();
         final Queue<CoordStep> q = new LinkedList<>();
-        q.add(new CoordStep(start, 0));
-        visited.add(start);
+        q.add(new CoordStep(end, 0));
+        visited.add(end);
 
         while (!q.isEmpty()) {
             final CoordStep coordStep = q.remove();
             final Coordinate curr = coordStep.coordinate();
-            if (curr.equals(end)) {
+            if (elevation[curr.row][curr.col] == BOTTOM_ELEVATION) {
                 return coordStep.step();
             } else {
                 addNextSteps(q, visited, curr, coordStep.step);
@@ -59,7 +60,7 @@ public class SignalFinder {
             final Coordinate next = new Coordinate(curr.row() + dir[0], curr.col() + dir[1]);
             if (!visited.contains(next)
                     && !isOutOfBounds(next)
-                    && elevation[next.row()][next.col()] - elevation[curr.row()][curr.col()] <= 1) {
+                    && elevation[curr.row()][curr.col()] - elevation[next.row()][next.col()] <= 1) {
                 q.add(new CoordStep(next, step + 1));
                 visited.add(next);
             }
@@ -78,7 +79,7 @@ public class SignalFinder {
 
             for (int i = 0; i < line.length(); i++) {
                 if (line.charAt(i) == 'S') {
-                    elevation[count][i] = 'a';
+                    elevation[count][i] = BOTTOM_ELEVATION;
                     start = new Coordinate(count, i);
                 } else if (line.charAt(i) == 'E') {
                     elevation[count][i] = 'z';
