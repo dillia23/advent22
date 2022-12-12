@@ -3,20 +3,24 @@ package org.advent;
 import org.advent.utils.FileFinder;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Scanner;
 
 public class MonkeyBusinessCalculator {
     private static final String MONKEYS_FILE_LOC = "/monkeys.txt";
-    private static final int ROUNDS = 20;
+    private static final int ROUNDS = 10000;
 
-    private int monkeyBusinessLevel;
+    private BigInteger monkeyBusinessLevel;
     private final List<Monkey> monkeys;
     private char itemName;
 
@@ -33,7 +37,7 @@ public class MonkeyBusinessCalculator {
         calcMonkeyBusiness();
     }
 
-    public int getMonkeyBusinessLevel() {
+    public BigInteger getMonkeyBusinessLevel() {
         return monkeyBusinessLevel;
     }
 
@@ -47,7 +51,7 @@ public class MonkeyBusinessCalculator {
             throw new IllegalStateException("too little monkey business!");
         }
 
-        monkeyBusinessLevel = monkeyBusiness.poll() * monkeyBusiness.poll();
+        monkeyBusinessLevel = BigInteger.valueOf(monkeyBusiness.poll()).multiply(BigInteger.valueOf(monkeyBusiness.poll()));
     }
 
     private void playKeepAway() {
@@ -57,17 +61,34 @@ public class MonkeyBusinessCalculator {
             for (final Monkey monkey : monkeys) {
                 for (final Item item : monkey.getItems()) {
                     monkey.handled();
-                    int worryLevel = item.worryLevel();
-                    int newWorryLevel = monkey.doOperation(worryLevel);
-                    Item updatedItem = new Item(item.name(), newWorryLevel);
-                    int personalWorryLevel = testWorryLevel(updatedItem);
-                    int nextMonkeyToPassTo = monkey.chooseMonkeyToPassTo(personalWorryLevel);
-                    removes.add(new MonkeyRemove(item, monkey));
-                    passItem(new MonkeyPass(monkeys.get(nextMonkeyToPassTo), new Item(item.name(), personalWorryLevel)));
+                    BigInteger worryLevel = item.worryLevel();
+                    BigInteger newWorryLevel = monkey.doOperation(worryLevel);
+                    if (ROUNDS == 20) {
+                        Item reliefItem = new Item(item.name(), getRelief(newWorryLevel), item.worries());
+                        int nextMonkeyToPassTo = monkey.chooseMonkeyToPassTo(reliefItem.worryLevel().mod(BigInteger.valueOf(monkey.getTest().getDivisor())));
+                        removes.add(new MonkeyRemove(item, monkey));
+                        passItem(new MonkeyPass(monkeys.get(nextMonkeyToPassTo), reliefItem));
+                    } else {
+                        for (int j = 0; j < item.worries().length; j++) {
+                            BigInteger newWorry = monkey.doOperation(item.worries[j]).mod(BigInteger.valueOf(monkeys.get(j).getTest().getDivisor()));
+                            item.worries[j] = newWorry;
+
+                            if (j == monkey.getNum()) {
+                                Item updatedItem = new Item(item.name(), newWorry, item.worries());
+                                int nextMonkeyToPassTo = monkey.chooseMonkeyToPassTo(updatedItem.worryLevel());
+                                removes.add(new MonkeyRemove(item, monkey));
+                                passItem(new MonkeyPass(monkeys.get(nextMonkeyToPassTo), updatedItem));
+                            }
+                        }
+                    }
                 }
             }
             removeItems(removes);
         }
+    }
+
+    private static BigInteger getRelief(BigInteger worryLevel) {
+        return worryLevel.divide(BigInteger.valueOf(3));
     }
 
     private static void removeItems(Queue<MonkeyRemove> removes) {
@@ -90,10 +111,19 @@ public class MonkeyBusinessCalculator {
         while(scanner.hasNextLine()) {
             final String line = scanner.nextLine();
             if (line.startsWith("Monkey")) {
-                currMonkey = new Monkey(Integer.parseInt(line.substring((line.length() - 2), line.length() - 1)));
+                currMonkey = new Monkey(Integer.parseInt(line.substring(line.length() - 2, line.length() - 1)));
                 monkeys.add(currMonkey);
             } else if (!line.isBlank()) {
                 buildMonkey(currMonkey, line);
+            }
+        }
+        populateWorries();
+    }
+
+    private void populateWorries() {
+        for (final Monkey monkey: monkeys) {
+            for (final Item item: monkey.getItems()) {
+                Arrays.fill(item.worries(), item.worryLevel());
             }
         }
     }
@@ -121,7 +151,7 @@ public class MonkeyBusinessCalculator {
         final String[] parts = input.trim().replaceAll(",", "").split(" ");
         final List<Item> items = new ArrayList<>();
         for (int i = 2; i < parts.length; i++) {
-            items.add(new Item(itemName, Integer.parseInt(parts[i])));
+            items.add(new Item(itemName, BigInteger.valueOf(Integer.parseInt(parts[i])), new BigInteger[8]));
             itemName++;
         }
 
@@ -176,42 +206,44 @@ public class MonkeyBusinessCalculator {
         }
     }
 
-    private static int testWorryLevel(final Item item) {
-        return item.worryLevel / 3;
-    }
-
     static class Monkey {
-        private int handles;
         private final int num;
+        private int handles;
         private List<Item> items;
         // if null use operation self
         private Operation operation;
         private OperationSelf operationSelf;
         private MonkeyTest test;
+        private final Map<BigInteger, Integer> passPaths;
 
         public Monkey(final int num) {
             this.num = num;
             items = new ArrayList<>();
+            passPaths = new HashMap<>();
         }
 
-        public int doOperation(int worryLevel) {
+        public int getNum() {
+            return num;
+        }
+
+        public BigInteger doOperation(BigInteger worryLevel) {
             OperationType operationType;
-            int num;
+            BigInteger num;
             if (getOperation() == null) {
                 OperationSelf opSelf = getOperationSelf();
                 num = worryLevel;
                 operationType = opSelf.operationType;
             } else {
                 operationType = getOperation().operationType();
-                num = getOperation().num();
+                num = BigInteger.valueOf(getOperation().num());
             }
 
             switch (operationType) {
                 case ADD -> {
-                    return worryLevel + num;
+                    return worryLevel.add(num);
                 }
                 case MULTIPLY -> {
-                    return worryLevel * num;
+                    return worryLevel.multiply(num);
                 }
                 default -> throw new IllegalStateException("invalid operation type");
             }
@@ -221,17 +253,18 @@ public class MonkeyBusinessCalculator {
             handles++;
         }
 
-        public int chooseMonkeyToPassTo(int worryLevel) {
+        public int chooseMonkeyToPassTo(BigInteger worryLevel) {
+            if (passPaths.containsKey(worryLevel)) {
+                return passPaths.get(worryLevel);
+            }
             MonkeyTest test = getTest();
-            if (worryLevel % test.divisor == 0) {
-                return test.trueMonkey;
+            if (worryLevel.mod(BigInteger.valueOf(test.getDivisor())).equals(BigInteger.ZERO)) {
+                passPaths.put(worryLevel, test.getTrueMonkey());
+                return test.getTrueMonkey();
             }
 
-            return test.falseMonkey;
-        }
-
-        public int getNum() {
-            return num;
+            passPaths.put(worryLevel, test.getFalseMonkey());
+            return test.getFalseMonkey();
         }
 
         public Operation getOperation() {
@@ -281,7 +314,7 @@ public class MonkeyBusinessCalculator {
             return handles;
         }
     }
-    private record Item(char name, int worryLevel){}
+    private record Item(char name, BigInteger worryLevel, BigInteger[] worries){}
     private record Operation(OperationType operationType, int num) {}
     private record OperationSelf(OperationType operationType) {}
     enum OperationType {
