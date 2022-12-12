@@ -12,6 +12,16 @@ public class Main {
 
         // Day 10
         day10();
+
+        // Day 11
+        day11();
+    }
+
+    private static void day11() {
+        System.out.println("Day 11:");
+        final MonkeyBusinessCalculator monkeyBusinessCalculator = new MonkeyBusinessCalculator();
+        System.out.printf("Level of monkey business: %s%n", monkeyBusinessCalculator.getMonkeyBusinessLevel());
+        System.out.printf("***%n");
     }
 
     private static void day10() {
