@@ -15,6 +15,16 @@ public class Main {
 
         // Day 11
         day11();
+
+        // Day 12
+        day12();
+    }
+
+    private static void day12() {
+        System.out.println("Day 12:");
+        final SignalFinder signalFinder = new SignalFinder();
+        System.out.printf("Min steps for hiking trail: %s%n", signalFinder.getMinSteps());
+        System.out.printf("***%n");
     }
 
     private static void day11() {
