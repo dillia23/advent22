@@ -18,6 +18,16 @@ public class Main {
 
         // Day 12
         day12();
+
+        // Day 13
+        day13();
+    }
+
+    private static void day13() {
+        System.out.println("Day 13:");
+        final PacketEvaluator packetEvaluator = new PacketEvaluator();
+        System.out.printf("Sum of correct packet indices: %s%n", packetEvaluator.getCorrectPacketSum());
+        System.out.printf("***%n");
     }
 
     private static void day12() {
